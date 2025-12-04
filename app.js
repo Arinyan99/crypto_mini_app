@@ -1,4 +1,7 @@
-// Инициализация Telegram WebApp
+// Константы
+const BOT_USERNAME = "netysilcryptoaisignal_bot"; // при желании поменяй на имя своего бота
+
+// Telegram WebApp init
 const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
 if (tg) {
   tg.expand();
@@ -7,15 +10,54 @@ if (tg) {
 
 const userPill = document.getElementById("user-pill");
 
-// Показать имя пользователя, если Telegram его передал
+// Показать имя пользователя из Telegram
 if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) {
   const u = tg.initDataUnsafe.user;
   const fullName = [u.first_name, u.last_name].filter(Boolean).join(" ");
   userPill.textContent = fullName ? `👤 ${fullName}` : "👤 Пользователь";
 }
 
-// ---- Навигация между вкладками ----
+// ====== STATE ======
+const state = {
+  theme: localStorage.getItem("theme") || "dark",
+  riskMode: localStorage.getItem("riskMode") || "beginner",
+  lessonsDone: JSON.parse(localStorage.getItem("lessonsDone") || "[]"),
+  quests: JSON.parse(
+    localStorage.getItem("dailyQuests") ||
+      JSON.stringify({
+        learn: false,
+        signal: false,
+        calc: false,
+      })
+  ),
+  lastVisit: localStorage.getItem("lastVisit") || null,
+  streak: parseInt(localStorage.getItem("streak") || "0", 10),
+  lastVisitedTab: localStorage.getItem("lastTab") || "overview",
+  bestQuizScore: JSON.parse(localStorage.getItem("bestQuizScore") || '{"correct":0,"total":0}'),
+};
 
+// ====== THEME ======
+const themeToggle = document.getElementById("theme-toggle");
+
+function applyTheme() {
+  if (state.theme === "light") {
+    document.body.classList.add("light");
+    themeToggle.textContent = "☀️";
+  } else {
+    document.body.classList.remove("light");
+    themeToggle.textContent = "🌙";
+  }
+}
+
+themeToggle.addEventListener("click", () => {
+  state.theme = state.theme === "dark" ? "light" : "dark";
+  localStorage.setItem("theme", state.theme);
+  applyTheme();
+});
+
+applyTheme();
+
+// ====== NAVIGATION ======
 const navTabs = document.querySelectorAll(".nav-tab");
 const panels = {
   overview: document.getElementById("tab-overview"),
@@ -25,62 +67,142 @@ const panels = {
 };
 
 function switchTab(tab) {
-  navTabs.forEach((b) => {
-    b.classList.toggle("active", b.dataset.tab === tab);
-  });
+  state.lastVisitedTab = tab;
+  localStorage.setItem("lastTab", tab);
+
+  navTabs.forEach((btn) => btn.classList.toggle("active", btn.dataset.tab === tab));
   Object.entries(panels).forEach(([key, panel]) => {
     panel.classList.toggle("active", key === tab);
   });
+
+  if (tab === "signals") markQuest("signal");
+  if (tab === "academy") markQuest("learn");
 }
 
 navTabs.forEach((btn) => {
-  btn.addEventListener("click", () => {
-    switchTab(btn.dataset.tab);
-  });
+  btn.addEventListener("click", () => switchTab(btn.dataset.tab));
 });
 
-// ---- Быстрые действия на обзоре ----
+// восстановить вкладку
+switchTab(state.lastVisitedTab);
 
+// Быстрые действия
 document.querySelectorAll(".pill-btn").forEach((btn) => {
   btn.addEventListener("click", () => {
-    const action = btn.dataset.action;
-    if (action === "academy") switchTab("academy");
-    if (action === "signals") switchTab("signals");
-    if (action === "tools") switchTab("tools");
+    const a = btn.dataset.action;
+    if (a === "go-signals") switchTab("signals");
+    if (a === "go-academy") switchTab("academy");
+    if (a === "go-tools") switchTab("tools");
   });
 });
 
-// ---- Низ панели ----
-
+// Низ
 document.querySelectorAll(".bottom-btn").forEach((btn) => {
   btn.addEventListener("click", () => {
-    const action = btn.dataset.action;
-    if (action === "open-bot") {
+    const act = btn.dataset.action;
+    if (act === "bot-commands") {
       if (tg) {
-        tg.openTelegramLink(`https://t.me/${tg.initDataUnsafe?.user?.username || ""}`);
+        tg.openTelegramLink(`https://t.me/${BOT_USERNAME}?start=help_from_webapp`);
       }
-    } else if (action === "open-academy") {
+    } else if (act === "open-academy") {
       switchTab("academy");
-    } else if (action === "open-risk") {
-      switchTab("overview");
-      document.getElementById("risk-mode-desc")?.scrollIntoView({ behavior: "smooth", block: "center" });
+    } else if (act === "open-tools") {
+      switchTab("tools");
     }
   });
 });
 
-// ---- Псевдо-состояние приложения ----
+// ====== STREAK / LEVEL / QUESTS ======
+const levelLabel = document.getElementById("user-level-label");
+const streakLabel = document.getElementById("user-streak-label");
+const questsListEl = document.getElementById("quests-list");
+const streakHint = document.getElementById("streak-hint");
 
-const state = {
-  riskMode: localStorage.getItem("riskMode") || "beginner",
-  lessonsDone: JSON.parse(localStorage.getItem("lessonsDone") || "[]"),
-};
+function updateStreak() {
+  const today = new Date().toISOString().slice(0, 10);
+  if (!state.lastVisit) {
+    state.lastVisit = today;
+    state.streak = 1;
+  } else if (state.lastVisit !== today) {
+    const last = new Date(state.lastVisit);
+    const now = new Date(today);
+    const diff = (now - last) / (1000 * 60 * 60 * 24);
+    if (diff === 1) {
+      state.streak += 1;
+    } else {
+      state.streak = 1;
+    }
+    state.lastVisit = today;
+  }
 
-// ---- Режим риска ----
+  localStorage.setItem("lastVisit", state.lastVisit);
+  localStorage.setItem("streak", state.streak.toString());
 
+  const lvl = 1 + Math.floor(state.lessonsDone.length / 2) + Math.floor(state.streak / 3);
+  levelLabel.textContent = `LVL ${lvl}`;
+  streakLabel.textContent = `${state.streak}-й день стрика`;
+}
+
+function markQuest(key) {
+  if (!state.quests[key]) {
+    state.quests[key] = true;
+    localStorage.setItem("dailyQuests", JSON.stringify(state.quests));
+    renderQuests();
+  }
+}
+
+function resetQuestsIfNeeded() {
+  const today = new Date().toISOString().slice(0, 10);
+  if (!state.lastVisit || state.lastVisit !== today) {
+    state.quests = { learn: false, signal: false, calc: false };
+    localStorage.setItem("dailyQuests", JSON.stringify(state.quests));
+  }
+}
+
+function renderQuests() {
+  questsListEl.innerHTML = "";
+  const config = {
+    learn: "Пройти 1 урок в Академии",
+    signal: "Открыть вкладку с сигналами",
+    calc: "Посчитать хотя бы одну сделку",
+  };
+
+  Object.entries(config).forEach(([key, text]) => {
+    const li = document.createElement("li");
+    li.className = "quest-item";
+    const label = document.createElement("div");
+    label.className = "quest-label";
+    label.innerHTML = `<span>${state.quests[key] ? "✅" : "⬜"}</span><span>${text}</span>`;
+    const btn = document.createElement("button");
+    btn.className = "quest-toggle";
+    btn.textContent = state.quests[key] ? "✔" : "";
+    btn.addEventListener("click", () => {
+      state.quests[key] = !state.quests[key];
+      localStorage.setItem("dailyQuests", JSON.stringify(state.quests));
+      renderQuests();
+    });
+
+    li.appendChild(label);
+    li.appendChild(btn);
+    questsListEl.appendChild(li);
+  });
+
+  const doneCount = Object.values(state.quests).filter(Boolean).length;
+  streakHint.textContent = doneCount === 3
+    ? "🔥 Все квесты дня сделаны! Ты реально относишься к этому как к делу, а не к казино."
+    : "Совет: выполняй хотя бы 2 квеста в день, чтобы не терять стрик.";
+}
+
+resetQuestsIfNeeded();
+updateStreak();
+renderQuests();
+
+// ====== RISK PROFILE ======
 const riskDescriptions = {
-  beginner: "Минимальный риск, маленькие объёмы, главное — не слить депозит и научиться выживать.",
-  safe: "Осторожная торговля: фиксированные риски на сделку, разумный стоп-лосс и постепенное наращивание объёма.",
-  normal: "Сбалансированный подход: принимаешь риск, но считаешь его заранее и не залетаешь во всё подряд.",
+  beginner: "Минимальный риск, маленькие объёмы, цель — не потерять депозит и привыкнуть к волатильности.",
+  safe: "Осторожная торговля с фиксированным риском на сделку и продуманными стопами.",
+  normal: "Сбалансированный подход: риск есть, но он осознан и заранее посчитан.",
+  crazy: "Агрессивный стиль: высокие плечи и частая торговля. Новый уровень ответственности, а не игры.",
 };
 
 const riskModeLabel = document.getElementById("risk-mode-label");
@@ -88,9 +210,17 @@ const riskModeDesc = document.getElementById("risk-mode-desc");
 
 function renderRiskMode() {
   const mode = state.riskMode;
-  riskModeLabel.textContent =
-    mode === "beginner" ? "Новичок" : mode === "safe" ? "Осторожный" : "Сбалансированный";
-  riskModeDesc.textContent = riskDescriptions[mode] || "";
+  const name =
+    mode === "beginner"
+      ? "Новичок"
+      : mode === "safe"
+      ? "Осторожный"
+      : mode === "normal"
+      ? "Сбалансированный"
+      : "Агрессивный";
+  riskModeLabel.textContent = name;
+  riskModeDesc.textContent = riskDescriptions[mode];
+
   document.querySelectorAll(".risk-btn").forEach((btn) => {
     btn.classList.toggle("risk-btn-active", btn.dataset.mode === mode);
   });
@@ -106,54 +236,48 @@ document.querySelectorAll(".risk-btn").forEach((btn) => {
 
 renderRiskMode();
 
-// ---- Подписки и статус сигналов (демо) ----
-
+// ====== DEMO SIGNAL STATUS ======
 const overviewSubsEl = document.getElementById("overview-subs");
 const overviewLastSignalEl = document.getElementById("overview-last-signal");
 const overviewThresholdEl = document.getElementById("overview-threshold");
 
-// Демо-подписки (можно потом заменить реальными данными)
+// псевдо-подписки
 let demoSubs = JSON.parse(localStorage.getItem("crypto_subs") || "[]");
-if (!demoSubs || demoSubs.length === 0) {
-  demoSubs = ["BTCUSDT", "ETHUSDT"];
-}
+if (!demoSubs.length) demoSubs = ["BTCUSDT", "ETHUSDT"];
 
 overviewSubsEl.textContent = demoSubs.length.toString();
 overviewLastSignalEl.textContent = "BTCUSDT • HOLD";
 overviewThresholdEl.textContent = "глобальный (из бота)";
 
 document.getElementById("btn-open-settings").addEventListener("click", () => {
-  if (tg) {
-    tg.openTelegramLink("https://t.me/" + (tg.initDataUnsafe?.user?.username || ""));
-  }
+  if (tg) tg.openTelegramLink(`https://t.me/${BOT_USERNAME}?start=settings`);
 });
 
-// ---- Сигналы – карточки ----
-
-const signalsData = [
+// ====== DEMO SIGNALS DATA ======
+const signalsDataBase = [
   {
     symbol: "BTCUSDT",
     reco: "HOLD",
-    direction: "hold",
+    dir: "hold",
     change: 0.35,
-    comment: "Движение в пределах шума, логично подождать.",
-    timeframe: "M15",
+    tf: "M15",
+    comment: "Движение в пределах шума, лучше подождать более явное направление.",
   },
   {
     symbol: "ETHUSDT",
     reco: "BUY",
-    direction: "buy",
+    dir: "buy",
     change: 1.8,
-    comment: "Есть пробой локального уровня, возможен импульс вверх.",
-    timeframe: "H1",
+    tf: "H1",
+    comment: "Пробой локального уровня, объёмы растут — возможен импульс вверх.",
   },
   {
     symbol: "SOLUSDT",
     reco: "SELL",
-    direction: "sell",
+    dir: "sell",
     change: -2.4,
-    comment: "Сильный откат после резкого роста, риск коррекции.",
-    timeframe: "M5",
+    tf: "M5",
+    comment: "Резкий откат после сильного роста, высок риск коррекции глубже.",
   },
 ];
 
@@ -161,37 +285,35 @@ const signalsCardsEl = document.getElementById("signals-cards");
 
 function renderSignals(filterSymbol = "ALL") {
   signalsCardsEl.innerHTML = "";
-  const filtered =
+  const list =
     filterSymbol === "ALL"
-      ? signalsData
-      : signalsData.filter((s) => s.symbol === filterSymbol);
+      ? signalsDataBase
+      : signalsDataBase.filter((s) => s.symbol === filterSymbol);
 
-  filtered.forEach((s) => {
+  list.forEach((s) => {
     const card = document.createElement("div");
     card.className = "signal-card";
 
     const header = document.createElement("div");
     header.className = "signal-card-header";
-
-    const left = document.createElement("div");
-    left.innerHTML = `<span class="signal-symbol">${s.symbol}</span> · <span class="lesson-tag">${s.timeframe}</span>`;
+    header.innerHTML = `<div><span class="signal-symbol">${s.symbol}</span> · <span class="lesson-tag">${s.tf}</span></div>`;
 
     const pill = document.createElement("span");
-    pill.className = "signal-reco " + (s.direction === "sell" ? "sell" : s.direction === "hold" ? "hold" : "");
+    pill.className = "signal-reco";
+    if (s.dir === "sell") pill.classList.add("sell");
+    if (s.dir === "hold") pill.classList.add("hold");
     pill.textContent = s.reco;
 
-    header.appendChild(left);
     header.appendChild(pill);
 
     const body = document.createElement("div");
-    body.className = "signal-body";
-    body.innerHTML =
-      `<p>${s.comment}</p><p class="muted small">Изменение за период: <b>${s.change.toFixed(2)}%</b></p>`;
+    body.innerHTML = `<p>${s.comment}</p><p class="muted tiny">Изменение за период: <b>${s.change.toFixed(
+      2
+    )}%</b></p>`;
 
     const footer = document.createElement("div");
     footer.className = "signal-card-footer";
-    footer.innerHTML =
-      `<span>AI-анализ</span><span class="lesson-tag">Не финсовет</span>`;
+    footer.innerHTML = `<span>AI-анализ</span><span class="lesson-tag">Не финсовет</span>`;
 
     card.appendChild(header);
     card.appendChild(body);
@@ -211,58 +333,86 @@ document.querySelectorAll(".chip").forEach((chip) => {
   });
 });
 
-// ---- Академия: уроки и прогресс ----
+// генерация нового демо-сигнала
+document.getElementById("btn-new-signal").addEventListener("click", () => {
+  const symbols = ["BTCUSDT", "ETHUSDT", "SOLUSDT"];
+  const recos = [
+    { reco: "BUY", dir: "buy" },
+    { reco: "SELL", dir: "sell" },
+    { reco: "HOLD", dir: "hold" },
+  ];
+  const symbol = symbols[Math.floor(Math.random() * symbols.length)];
+  const r = recos[Math.floor(Math.random() * recos.length)];
+  const change = (Math.random() * 4 - 2).toFixed(2);
+  const tfArr = ["M5", "M15", "H1", "H4"];
+  const tf = tfArr[Math.floor(Math.random() * tfArr.length)];
 
+  const commentBase =
+    r.dir === "buy"
+      ? "Рынок показывает признаки силы, но риск всегда считаем заранее."
+      : r.dir === "sell"
+      ? "Просадка по цене, сигнал на выход или сокращение позиции."
+      : "Неясное направление — лучше сохранить капитал, чем гадать.";
+
+  signalsDataBase.unshift({
+    symbol,
+    reco: r.reco,
+    dir: r.dir,
+    change: parseFloat(change),
+    tf,
+    comment: commentBase,
+  });
+  // ограничиваем длину
+  if (signalsDataBase.length > 6) signalsDataBase.pop();
+
+  renderSignals(document.querySelector(".chip.chip-active").dataset.symbol);
+});
+
+// ====== ACADEMY: lessons & progress ======
 const lessonsData = [
   {
     id: "basic",
     title: "Что такое криптовалюта простыми словами",
     tag: "База",
     text:
-      "Криптовалюта — это цифровые деньги, которые существуют только в интернете и хранятся в блокчейне.\n\n" +
-      "Блокчейн — большая база данных, которую нельзя подделать одной кнопкой. Транзакции записываются в цепочку блоков, " +
-      "и каждый новый блок опирается на предыдущие.\n\n" +
-      "Главное для новичка: цена может сильно меняться, поэтому важно управлять риском и не заходить на все деньги.",
+      "Криптовалюта — это цифровые деньги, которые живут в блокчейне. Нет банка-центра, который может «откатить» перевод.\n\n" +
+      "Каждая транзакция попадает в цепочку блоков, которую сложно подделать. Отсюда и плюс (никто не заблокирует твой счёт), и минус (если ошибся — отката нет).\n\n" +
+      "Для новичка главное: волатильность + ответственность. Здесь нет кнопки «вернуть деньги».",
   },
   {
     id: "risk",
-    title: "Риски и как не слить депозит",
-    tag: "Риск-менеджмент",
+    title: "Риск-менеджмент: почему это важнее входа",
+    tag: "Риск",
     text:
-      "Крипта даёт как большие возможности, так и большие просадки.\n\n" +
-      "Частые ошибки новичков:\n" +
-      "• вход all-in в одну монету;\n" +
-      "• отсутствие стоп-лосса;\n" +
-      "• вера в «точные сигналы» и «гарантированный доход».\n\n" +
+      "Большинство новичков сливают депозит не потому, что «не угадали монету», а потому, что не считали риск.\n\n" +
       "Базовые правила:\n" +
-      "1) Не инвестируй последние деньги и кредиты.\n" +
-      "2) Риск на сделку — фиксированный процент от депозита.\n" +
-      "3) Стоп-лосс ставится заранее, а не «по ощущениям».",
+      "• на одну сделку — фиксированный процент от депозита;\n" +
+      "• стоп-лосс ставится до входа, а не после;\n" +
+      "• одно резкое движение не должно сносить весь аккаунт.\n\n" +
+      "Задача mini-апки — напоминать об этом каждый раз, когда ты что-то считаешь.",
   },
   {
     id: "wallets",
-    title: "Биржи, кошельки и хранение",
+    title: "Биржи и кошельки: где держать крипту",
     tag: "Безопасность",
     text:
-      "Биржа (Binance, OKX и др.) — место, где ты покупаешь и продаёшь криптовалюту.\n" +
-      "Кошелёк (Trust Wallet, MetaMask и др.) — приложение, где ты сам контролируешь приватные ключи.\n\n" +
-      "Если сумма серьёзная:\n" +
-      "• держи основную часть на кошельках;\n" +
-      "• делай резервную копию seed-фразы;\n" +
-      "• не вводи свои ключи на незнакомых сайтах.",
+      "Биржа (Binance, OKX и др.) — удобно торговать, но это не твои ключи.\n" +
+      "Кошелёк (Trust Wallet, MetaMask и др.) — приватные ключи у тебя, но больше ответственности.\n\n" +
+      "Если сумма серьёзная — основную часть держат на кошельках, а на бирже оставляют активы под торговлю.\n" +
+      "Seed-фразы никогда не вводятся на «подозрительных сайтах ради аирдропа».",
   },
   {
     id: "signals",
-    title: "Как правильно использовать сигналы бота",
+    title: "Как пользоваться сигналами бота с головой",
     tag: "Практика",
     text:
-      "Сигналы бота — это подсказка, а не приказ.\n\n" +
+      "Сигнал — это повод открыть график и подумать, а не приказ «бери сейчас».\n\n" +
       "Алгоритм:\n" +
-      "1) Пришёл сигнал — смотри график и уровень волатильности.\n" +
-      "2) Оцени тренд: нет ли уже огромного пампа.\n" +
-      "3) Рассчитай размер позиции через калькулятор.\n" +
+      "1) Пришёл сигнал — смотри тренд и волатильность.\n" +
+      "2) Оцени, не было ли до этого уже огромного пампа.\n" +
+      "3) Считай размер позиции через калькулятор.\n" +
       "4) Сразу ставь стоп и цели.\n\n" +
-      "Так ты учишься думать, а не слепо следовать уведомлениям.",
+      "Так ты превращаешь уведомления в инструмент, а не в казино.",
   },
 ];
 
@@ -296,6 +446,7 @@ function updateProgress() {
   const percent = total ? (done / total) * 100 : 0;
   progressBar.style.width = `${percent}%`;
   progressText.textContent = `${done} / ${total} уроков`;
+  updateStreak(); // уровень учитывает уроки
 }
 
 function renderLessonsList() {
@@ -306,13 +457,12 @@ function renderLessonsList() {
 
     const meta = document.createElement("div");
     meta.className = "lesson-meta";
-    const title = document.createElement("div");
-    title.textContent = lesson.title;
+    const t = document.createElement("div");
+    t.textContent = lesson.title;
     const tag = document.createElement("div");
     tag.className = "lesson-tag";
     tag.textContent = lesson.tag;
-
-    meta.appendChild(title);
+    meta.appendChild(t);
     meta.appendChild(tag);
 
     const pill = document.createElement("span");
@@ -358,14 +508,98 @@ lessonToggleBtn.addEventListener("click", () => {
   renderLessonsList();
   openLesson(currentLessonId);
   updateProgress();
+  markQuest("learn");
 });
 
-// Первичная отрисовка
 renderLessonsList();
 updateProgress();
 
-// ---- Калькулятор позиции ----
+// ====== QUIZ ======
+const quizQuestions = [
+  {
+    q: "Что главное для новичка в крипте?",
+    options: [
+      "Угадать монету, которая x100 за неделю",
+      "Научиться управлять риском и не сливать депозит",
+      "Брать как можно больше плечо (кредитное плечо)",
+    ],
+    correct: 1,
+  },
+  {
+    q: "Что такое стоп-лосс?",
+    options: [
+      "Кнопка, которая гарантирует прибыль",
+      "Цена, по которой ты заранее согласен выйти с контролируемым убытком",
+      "Автоматическая покупка по лучшей цене",
+    ],
+    correct: 1,
+  },
+  {
+    q: "Где безопаснее хранить крупные суммы?",
+    options: [
+      "На бирже без 2FA, чтобы быстро выводить",
+      "Только на стейкинге с сумасшедшими процентами",
+      "На собственных кошельках с сохранённой seed-фразой",
+    ],
+    correct: 2,
+  },
+];
 
+let currentQuizIndex = 0;
+
+const quizQuestionEl = document.getElementById("quiz-question");
+const quizOptionsEl = document.getElementById("quiz-options");
+const quizResultEl = document.getElementById("quiz-result");
+const quizNextBtn = document.getElementById("quiz-next");
+const quizBestEl = document.getElementById("quiz-best");
+
+function renderBestQuiz() {
+  quizBestEl.textContent = `${state.bestQuizScore.correct}/${state.bestQuizScore.total}`;
+}
+
+function renderQuiz() {
+  quizResultEl.textContent = "";
+  quizOptionsEl.innerHTML = "";
+  const q = quizQuestions[currentQuizIndex];
+  quizQuestionEl.textContent = q.q;
+  q.options.forEach((opt, idx) => {
+    const btn = document.createElement("button");
+    btn.className = "quiz-option";
+    btn.textContent = opt;
+    btn.addEventListener("click", () => handleQuizAnswer(idx));
+    quizOptionsEl.appendChild(btn);
+  });
+}
+
+function handleQuizAnswer(idx) {
+  const q = quizQuestions[currentQuizIndex];
+  const buttons = quizOptionsEl.querySelectorAll(".quiz-option");
+  buttons.forEach((b, i) => {
+    b.disabled = true;
+    if (i === q.correct) b.classList.add("correct");
+    if (i === idx && i !== q.correct) b.classList.add("wrong");
+  });
+
+  const correct = idx === q.correct;
+  quizResultEl.textContent = correct ? "✅ Верно! Так держать." : "⚠️ Не совсем. Перечитай уроки — это не страшно.";
+  // обновляем лучший результат
+  state.bestQuizScore.total += 1;
+  if (correct) state.bestQuizScore.correct += 1;
+  localStorage.setItem("bestQuizScore", JSON.stringify(state.bestQuizScore));
+  renderBestQuiz();
+}
+
+quizNextBtn.addEventListener("click", () => {
+  currentQuizIndex = (currentQuizIndex + 1) % quizQuestions.length;
+  renderQuiz();
+});
+
+renderBestQuiz();
+renderQuiz();
+
+// ====== TOOLS ======
+
+// Position size
 const balanceInput = document.getElementById("balance");
 const riskInput = document.getElementById("risk");
 const stopInput = document.getElementById("stop");
@@ -387,11 +621,12 @@ calcBtn.addEventListener("click", () => {
 
   calcResult.textContent =
     `Максимальный размер позиции ≈ ${positionSize.toFixed(2)} USDT ` +
-    `при риске ${risk.toFixed(2)}% и стоп-лоссе ${stop.toFixed(2)}%.`;
+    `(риск ${risk.toFixed(2)}% от депозита, стоп ${stop.toFixed(2)}%).`;
+
+  markQuest("calc");
 });
 
-// ---- DCA калькулятор ----
-
+// DCA
 const dcaPrice1 = document.getElementById("dca-price1");
 const dcaPrice2 = document.getElementById("dca-price2");
 const dcaAmount = document.getElementById("dca-amount");
@@ -402,25 +637,48 @@ dcaBtn.addEventListener("click", () => {
   const p1 = parseFloat(dcaPrice1.value);
   const p2 = parseFloat(dcaPrice2.value);
   const amount = parseFloat(dcaAmount.value);
-
   if (!p1 || !p2 || !amount || p1 <= 0 || p2 <= 0 || amount <= 0) {
-    dcaResult.textContent = "Введи две цены и одинаковый объём покупок.";
+    dcaResult.textContent = "Введи две цены и одинаковый объём.";
     return;
   }
-
   const coins1 = amount / p1;
   const coins2 = amount / p2;
   const totalCoins = coins1 + coins2;
   const totalSpent = amount * 2;
   const avgPrice = totalSpent / totalCoins;
-
-  dcaResult.textContent =
-    `Средняя цена входа ≈ ${avgPrice.toFixed(2)}. ` +
-    `Усреднение не убирает риск, но делает входы более плавными.`;
+  dcaResult.textContent = `Средняя цена входа ≈ ${avgPrice.toFixed(
+    2
+  )}. DCA сглаживает вход, но не отменяет риск.`;
 });
 
-// ---- План сделки ----
+// PnL
+const pnlEntry = document.getElementById("pnl-entry");
+const pnlExit = document.getElementById("pnl-exit");
+const pnlSize = document.getElementById("pnl-size");
+const pnlBtn = document.getElementById("pnl-btn");
+const pnlResult = document.getElementById("pnl-result");
 
+pnlBtn.addEventListener("click", () => {
+  const entry = parseFloat(pnlEntry.value);
+  const exit = parseFloat(pnlExit.value);
+  const size = parseFloat(pnlSize.value);
+
+  if (!entry || !exit || !size || entry <= 0 || exit <= 0 || size <= 0) {
+    pnlResult.textContent = "Заполни все поля.";
+    return;
+  }
+
+  const changePct = ((exit - entry) / entry) * 100;
+  const profit = (changePct / 100) * size;
+
+  pnlResult.textContent =
+    `Изменение цены: ${changePct.toFixed(2)}%. ` +
+    (profit >= 0
+      ? `Примерная прибыль: +${profit.toFixed(2)} USDT.`
+      : `Примерный убыток: ${profit.toFixed(2)} USDT.`);
+});
+
+// Plan
 const planEntry = document.getElementById("plan-entry");
 const planTarget = document.getElementById("plan-target");
 const planStop = document.getElementById("plan-stop");
@@ -436,9 +694,8 @@ planBtn.addEventListener("click", () => {
     planResult.textContent = "Заполни все три цены.";
     return;
   }
-
   if (stop >= entry) {
-    planResult.textContent = "Стоп-лосс должен быть ниже цены входа.";
+    planResult.textContent = "Стоп-лосс должен быть ниже входа.";
     return;
   }
 
@@ -451,6 +708,7 @@ planBtn.addEventListener("click", () => {
     `• Вход: ${entry}\n` +
     `• Цель: ${target}\n` +
     `• Стоп-лосс: ${stop}\n\n` +
-    `Соотношение риск/прибыль (R:R) ≈ ${rr.toFixed(2)}. ` +
-    `Чем выше R:R, тем меньше сделок нужно, чтобы быть в плюсе.`;
+    `Соотношение риск/прибыль ≈ ${rr.toFixed(
+      2
+    )}. Чем выше R:R, тем меньше сделок нужно, чтобы быть в плюсе.`;
 });
