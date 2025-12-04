@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <title>Crypto AI Hub</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+<body>
+  <div class="bg-tokens">
+    <div class="token token-btc">BTC</div>
+    <div class="token token-eth">ETH</div>
+    <div class="token token-sol">SOL</div>
+    <div class="token token-ton">TON</div>
+    <div class="token token-bnb">BNB</div>
+  </div>
+
+  <div class="app">
+    <header class="header">
+      <div class="branding">
+        <div class="logo-circle">AI</div>
+        <div>
+          <h1>Crypto AI Hub</h1>
+          <p class="subtitle">Сигналы и обучение крипте для новичков</p>
+        </div>
+      </div>
+      <div id="user-pill" class="user-pill">👤 Гость</div>
+    </header>
+
+    <nav class="nav-tabs">
+      <button class="nav-tab active" data-tab="overview">Обзор</button>
+      <button class="nav-tab" data-tab="signals">Сигналы</button>
+      <button class="nav-tab" data-tab="academy">Академия</button>
+      <button class="nav-tab" data-tab="tools">Инструменты</button>
+    </nav>
+
+    <main>
+      <!-- ОБЗОР -->
+      <section class="tab-panel active" id="tab-overview">
+        <div class="card hero">
+          <h2>Добро пожаловать в крипту 👋</h2>
+          <p>Это твой центр управления: сигналы бота, обучение и калькуляторы риска — в одном месте.</p>
+          <ul class="hero-list">
+            <li>🧠 AI-сигналы по топ-монетам</li>
+            <li>📚 Курс «крипта с нуля» внутри мини-апки</li>
+            <li>🧮 Калькулятор позиции и риска</li>
+          </ul>
+        </div>
+
+        <div class="cards-grid">
+          <div class="card">
+            <h3>Быстрый старт</h3>
+            <ol class="steps">
+              <li>Подпишись на пару в боте: <code>/subscribe BTCUSDT</code></li>
+              <li>Поставь безопасный порог сигналов: <code>/set_threshold 0.5</code></li>
+              <li>Пройди уроки в разделе «Академия»</li>
+            </ol>
+          </div>
+
+          <div class="card">
+            <h3>Статус сигналов</h3>
+            <p class="muted">Эти данные примерные — для новичка важно понять логику, а не точные числа.</p>
+            <div class="signal-stats">
+              <div>
+                <span class="stat-label">Активных подписок</span>
+                <span class="stat-value" id="overview-subs">0</span>
+              </div>
+              <div>
+                <span class="stat-label">Последний сигнал</span>
+                <span class="stat-value" id="overview-last-signal">—</span>
+              </div>
+              <div>
+                <span class="stat-label">Режим порога</span>
+                <span class="stat-value" id="overview-threshold">—</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- СИГНАЛЫ -->
+      <section class="tab-panel" id="tab-signals">
+        <div class="card">
+          <h2>Твои сигналы</h2>
+          <p class="muted">Список монет, на которые ты подписан в боте. Управление — через команды.</p>
+          <ul id="signals-list" class="list"></ul>
+          <p class="hint">
+            💬 В боте используй:<br />
+            <code>/subscribe BTCUSDT</code>,
+            <code>/unsubscribe BTCUSDT</code>,
+            <code>/my_subs</code>,
+            <code>/set_threshold 0.5</code>
+          </p>
+        </div>
+
+        <div class="card">
+          <h3>Как читать AI-сигналы</h3>
+          <ul class="bullets">
+            <li><b>BUY</b> — ИИ видит потенциал роста. Это повод изучить график, а не слепая команда «покупай».</li>
+            <li><b>SELL</b> — возможна коррекция или перегрев рынка.</li>
+            <li><b>HOLD</b> — лучше подождать и не суетиться.</li>
+          </ul>
+          <p class="warning">
+            ⚠️ Важно: сигналы — не финансовый совет. Всегда принимай решения сам и учитывай риск.
+          </p>
+        </div>
+      </section>
+
+      <!-- АКАДЕМИЯ -->
+      <section class="tab-panel" id="tab-academy">
+        <div class="card">
+          <h2>Академия для новичков</h2>
+          <p class="muted">Несколько коротких уроков, чтобы понять крипту без сложных терминов.</p>
+          <div id="lessons-list" class="lessons"></div>
+        </div>
+
+        <div class="card" id="lesson-view" style="display:none;">
+          <h3 id="lesson-title"></h3>
+          <p id="lesson-text"></p>
+        </div>
+      </section>
+
+      <!-- ИНСТРУМЕНТЫ -->
+      <section class="tab-panel" id="tab-tools">
+        <div class="card">
+          <h2>Калькулятор позиции</h2>
+          <p class="muted">Помогает не залетать all-in и считать риск заранее.</p>
+          <div class="form-row">
+            <label>Баланс (USDT)</label>
+            <input type="number" id="balance" placeholder="Например, 1000" />
+          </div>
+          <div class="form-row">
+            <label>Риск на сделку (%)</label>
+            <input type="number" id="risk" placeholder="Например, 2" />
+          </div>
+          <div class="form-row">
+            <label>Стоп-лосс (%)</label>
+            <input type="number" id="stop" placeholder="Например, 5" />
+          </div>
+          <button id="calc-btn">Рассчитать</button>
+          <p id="calc-result" class="result"></p>
+        </div>
+
+        <div class="card">
+          <h2>DCA-калькулятор (усреднение)</h2>
+          <p class="muted">Показывает среднюю цену, если покупать монету частями.</p>
+          <div class="form-row">
+            <label>Цена первой покупки</label>
+            <input type="number" id="dca-price1" placeholder="Например, 20000" />
+          </div>
+          <div class="form-row">
+            <label>Цена второй покупки</label>
+            <input type="number" id="dca-price2" placeholder="Например, 18000" />
+          </div>
+          <div class="form-row">
+            <label>Объём каждой покупки (USDT)</label>
+            <input type="number" id="dca-amount" placeholder="Например, 100" />
+          </div>
+          <button id="dca-btn">Посчитать среднюю цену</button>
+          <p id="dca-result" class="result"></p>
+        </div>
+
+        <div class="card">
+          <h2>Чек-лист безопасности</h2>
+          <ul class="bullets">
+            <li>Не храни крупные суммы на бирже, используй кошельки.</li>
+            <li>Никому не отправляй seed-фразу и приватные ключи.</li>
+            <li>Проверяй домен сайта и включай 2FA.</li>
+            <li>Скептически относись к «гарантированным 10% в день».</li>
+          </ul>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
