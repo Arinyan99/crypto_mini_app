@@ -16,10 +16,11 @@ body {
   max-width: 520px;
   margin: 0 auto;
   padding: 12px;
+  padding-bottom: 60px; /* место для нижней панели */
   z-index: 2;
 }
 
-/* Плавающие токены на фоне */
+/* Плавающие токены */
 
 .bg-tokens {
   position: fixed;
@@ -137,11 +138,13 @@ body {
   color: #d6ddff;
   font-size: 13px;
   cursor: pointer;
+  transition: background 0.15s ease, transform 0.1s ease;
 }
 
 .nav-tab.active {
   background: linear-gradient(135deg, #3a86ff, #00c896);
   color: #ffffff;
+  transform: translateY(-1px);
 }
 
 /* Карточки */
@@ -167,7 +170,11 @@ body {
 }
 
 .hero {
-  background: radial-gradient(circle at top left, rgba(58, 134, 255, 0.4), rgba(16, 22, 50, 0.95));
+  background: radial-gradient(
+      circle at top left,
+      rgba(58, 134, 255, 0.4),
+      rgba(16, 22, 50, 0.95)
+    );
 }
 
 .hero-list {
@@ -179,6 +186,25 @@ body {
 .hero-list li {
   margin-bottom: 2px;
 }
+
+.quick-actions {
+  margin-top: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.pill-btn {
+  border-radius: 999px;
+  border: none;
+  padding: 6px 10px;
+  font-size: 12px;
+  background: rgba(24, 32, 75, 0.95);
+  color: #dfe4ff;
+  cursor: pointer;
+}
+
+/* Обзор – сетка */
 
 .cards-grid {
   display: grid;
@@ -198,6 +224,10 @@ body {
   margin-bottom: 8px;
 }
 
+.muted.small {
+  font-size: 12px;
+}
+
 .hint {
   font-size: 12px;
   color: #a7b3d9;
@@ -210,49 +240,19 @@ body {
   margin-top: 8px;
 }
 
-.list {
-  list-style: none;
-  margin-top: 4px;
-  font-size: 13px;
-}
-
-.list li {
-  padding: 3px 0;
-}
-
-.bullets {
-  font-size: 13px;
-  padding-left: 16px;
-}
-
-.bullets li {
-  margin-bottom: 4px;
-}
-
-.steps {
-  font-size: 13px;
-  padding-left: 18px;
-}
-
-.steps li {
-  margin-bottom: 4px;
-}
-
-.signal-stats {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 4px;
-  margin-top: 4px;
-  font-size: 13px;
-}
-
 .stat-label {
   color: #a7b3d9;
   display: block;
+  font-size: 12px;
 }
 
 .stat-value {
   font-weight: 600;
+  font-size: 14px;
+}
+
+.small {
+  font-size: 12px;
 }
 
 /* Табы */
@@ -263,6 +263,134 @@ body {
 
 .tab-panel.active {
   display: block;
+}
+
+/* Кнопки режимов риска */
+
+.risk-modes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.risk-btn {
+  border-radius: 999px;
+  padding: 6px 10px;
+  border: none;
+  font-size: 12px;
+  background: rgba(24, 32, 75, 0.9);
+  color: #dfe4ff;
+  cursor: pointer;
+}
+
+.risk-btn-active {
+  background: linear-gradient(135deg, #f97316, #fb7185);
+  color: #fff;
+}
+
+/* secondary / tiny */
+
+.secondary-btn {
+  border-radius: 999px;
+  border: 1px solid rgba(99, 102, 241, 0.7);
+  background: transparent;
+  padding: 6px 10px;
+  font-size: 12px;
+  color: #e5e7ff;
+  cursor: pointer;
+}
+
+.secondary-btn.tiny,
+.secondary-btn.tiny#btn-open-settings {
+  font-size: 11px;
+  padding: 4px 8px;
+}
+
+.tiny {
+  font-size: 11px;
+}
+
+/* Сигналы */
+
+.signal-stats {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 4px;
+  margin-top: 4px;
+  font-size: 13px;
+}
+
+.signal-filters {
+  display: flex;
+  gap: 6px;
+  margin: 6px 0 8px;
+  flex-wrap: wrap;
+}
+
+.chip {
+  border-radius: 999px;
+  border: none;
+  padding: 4px 10px;
+  font-size: 11px;
+  background: rgba(24, 32, 75, 0.8);
+  color: #dfe4ff;
+  cursor: pointer;
+}
+
+.chip-active {
+  background: linear-gradient(135deg, #3a86ff, #00c896);
+  color: #fff;
+}
+
+.signals-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.signal-card {
+  padding: 8px;
+  border-radius: 10px;
+  background: rgba(22, 30, 70, 0.95);
+  border: 1px solid rgba(56, 94, 255, 0.5);
+  font-size: 13px;
+}
+
+.signal-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.signal-symbol {
+  font-weight: 600;
+}
+
+.signal-reco {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(34, 197, 94, 0.15);
+  border: 1px solid rgba(34, 197, 94, 0.6);
+}
+
+.signal-reco.sell {
+  background: rgba(248, 113, 113, 0.15);
+  border-color: rgba(248, 113, 113, 0.7);
+}
+
+.signal-reco.hold {
+  background: rgba(148, 163, 184, 0.15);
+  border-color: rgba(148, 163, 184, 0.7);
+}
+
+.signal-card-footer {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 4px;
+  font-size: 11px;
 }
 
 /* Академия */
@@ -280,10 +408,67 @@ body {
   cursor: pointer;
   font-size: 13px;
   border: 1px solid transparent;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .lesson-item:hover {
   border-color: rgba(98, 135, 255, 0.7);
+}
+
+.lesson-meta {
+  display: flex;
+  flex-direction: column;
+}
+
+.lesson-tag {
+  font-size: 11px;
+  color: #a7b3d9;
+}
+
+.status-pill {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.2);
+  border: 1px solid rgba(148, 163, 184, 0.6);
+}
+
+.status-pill.done {
+  background: rgba(34, 197, 94, 0.15);
+  border-color: rgba(34, 197, 94, 0.7);
+}
+
+/* Lesson view */
+
+.lesson-view-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Progress bar */
+
+.progress {
+  width: 100%;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(30, 41, 80, 0.9);
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #3b82f6, #22c55e);
+  transition: width 0.2s ease-out;
+}
+
+.progress-text {
+  font-size: 12px;
+  margin-top: 4px;
 }
 
 /* Формы и кнопки */
@@ -312,7 +497,8 @@ button {
 }
 
 #calc-btn,
-#dca-btn {
+#dca-btn,
+#plan-btn {
   width: 100%;
   margin-top: 4px;
   padding: 8px;
@@ -329,7 +515,35 @@ button {
   font-size: 13px;
 }
 
-/* Прочее */
+/* Низ */
+
+.bottom-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 6px 8px;
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  background: linear-gradient(to top, rgba(5, 7, 20, 0.98), transparent);
+  backdrop-filter: blur(14px);
+  z-index: 5;
+}
+
+.bottom-btn {
+  flex: 1;
+  max-width: 170px;
+  border-radius: 999px;
+  border: none;
+  padding: 6px 8px;
+  font-size: 11px;
+  background: rgba(24, 32, 75, 0.95);
+  color: #e5e7ff;
+  cursor: pointer;
+}
+
+/* Код */
 
 code {
   background: rgba(255, 255, 255, 0.06);
