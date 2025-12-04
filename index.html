@@ -8,32 +8,23 @@
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
-  <!-- НЕОНОВЫЙ ФОН -->
-  <div class="bg-layer">
-    <div class="bg-grid"></div>
-    <div class="orb orb-1"></div>
-    <div class="orb orb-2"></div>
-    <div class="orb orb-3"></div>
-    <div class="orb orb-4"></div>
-  </div>
-
   <div class="app">
     <!-- HEADER -->
     <header class="header">
       <div class="branding">
-        <div class="logo-circle">AI</div>
+        <div class="logo-square">AI</div>
         <div>
           <h1>Crypto AI Hub</h1>
-          <p class="subtitle">Твой центр крипты: сигналы, обучение, риск</p>
+          <p class="subtitle">Сигналы, аналитика и обучение для новичков</p>
         </div>
       </div>
       <div class="header-right">
         <button id="theme-toggle" class="icon-btn" title="Сменить тему">🌙</button>
-        <div id="user-pill" class="user-pill">👤 Гость</div>
+        <div id="user-pill" class="user-pill">Гость</div>
       </div>
     </header>
 
-    <!-- ВЕРХНЯЯ НАВИГАЦИЯ -->
+    <!-- ВЕРХНИЕ ВКЛАДКИ -->
     <nav class="nav-tabs">
       <button class="nav-tab active" data-tab="overview">Обзор</button>
       <button class="nav-tab" data-tab="signals">Сигналы</button>
@@ -44,123 +35,124 @@
     <main>
       <!-- ОБЗОР -->
       <section class="tab-panel active" id="tab-overview">
-        <div class="card hero">
-          <div class="hero-top">
-            <div>
-              <h2>Добро пожаловать в крипту 🚀</h2>
-              <p class="muted small">
-                Здесь ты комбинируешь сигналы бота, обучение и риск-менеджмент. Всё, что нужно новичку — в одной мини-апке.
-              </p>
-            </div>
-            <div class="level-badge">
-              <span id="user-level-label">LVL 1</span>
-              <small id="user-streak-label">0-й день стрика</small>
-            </div>
-          </div>
-
-          <div class="quick-actions">
-            <button class="pill-btn" data-action="go-signals">📡 К сигналам</button>
-            <button class="pill-btn" data-action="go-academy">📚 Учиться</button>
-            <button class="pill-btn" data-action="go-tools">🧮 Риск/калькуляторы</button>
-          </div>
-
-          <div class="journey">
-            <div class="journey-step">
-              <span>1</span>
-              <p>Подпишись в боте: <code>/subscribe BTCUSDT</code></p>
-            </div>
-            <div class="journey-step">
-              <span>2</span>
-              <p>Поставь безопасный порог: <code>/set_threshold 0.5</code></p>
-            </div>
-            <div class="journey-step">
-              <span>3</span>
-              <p>Пройди уроки в «Академии» и делай сделки уже осознанно</p>
-            </div>
-          </div>
-        </div>
-
-        <div class="cards-grid">
-          <!-- ПРОФИЛЬ РИСКА -->
-          <div class="card">
-            <h3>Профиль трейдера</h3>
-            <p class="muted small">Выбери режим — подсказки в инструментах будут подстраиваться под него.</p>
-            <div class="risk-modes">
-              <button class="risk-btn" data-mode="beginner">🍼 Новичок</button>
-              <button class="risk-btn" data-mode="safe">🛡 Осторожный</button>
-              <button class="risk-btn" data-mode="normal">⚖️ Сбалансированный</button>
-              <button class="risk-btn" data-mode="crazy">🔥 Агрессивный</button>
-            </div>
-            <div class="risk-summary">
-              <p><span class="stat-label">Текущий режим:</span> <span id="risk-mode-label" class="stat-value">—</span></p>
-              <p id="risk-mode-desc" class="muted small"></p>
-            </div>
-          </div>
-
-          <!-- СТАТУС СИГНАЛОВ -->
-          <div class="card">
-            <h3>Статус сигналов</h3>
-            <p class="muted tiny">Здесь демо-статистика, настоящие сигналы приходят в бота.</p>
-            <div class="signal-stats">
-              <div>
-                <span class="stat-label">Активных подписок</span>
-                <span class="stat-value" id="overview-subs">0</span>
-              </div>
-              <div>
-                <span class="stat-label">Последний сигнал</span>
-                <span class="stat-value" id="overview-last-signal">—</span>
-              </div>
-              <div>
-                <span class="stat-label">Текущий порог</span>
-                <span class="stat-value" id="overview-threshold">—</span>
-              </div>
-            </div>
-            <button class="secondary-btn tiny" id="btn-open-settings">Команды бота</button>
-          </div>
-        </div>
-
-        <!-- КВЕСТЫ/СТРИК -->
         <div class="card">
-          <h3>Дневные квесты 🎮</h3>
-          <p class="muted tiny">Выполняй простые действия каждый день и качай навык, а не азарт.</p>
-          <ul id="quests-list" class="quests"></ul>
-          <p class="muted tiny" id="streak-hint"></p>
+          <h2>Краткий обзор</h2>
+          <p class="muted tiny">
+            Здесь ты контролируешь работу бота, общие настройки и видишь базовый статус.
+          </p>
+          <div class="overview-grid">
+            <div>
+              <h3>Профиль трейдера</h3>
+              <p class="muted tiny">
+                Определи, как ты хочешь торговать — подсказки в инструментах будут учитывать это.
+              </p>
+              <div class="risk-modes">
+                <button class="risk-btn" data-mode="beginner">Новичок</button>
+                <button class="risk-btn" data-mode="safe">Осторожный</button>
+                <button class="risk-btn" data-mode="normal">Сбалансированный</button>
+                <button class="risk-btn" data-mode="aggressive">Агрессивный</button>
+              </div>
+              <div class="risk-summary">
+                <span class="stat-label">Текущий режим:</span>
+                <span id="risk-mode-label" class="stat-value">–</span>
+              </div>
+              <p id="risk-mode-desc" class="muted tiny"></p>
+            </div>
+
+            <div>
+              <h3>Статус сигналов</h3>
+              <p class="muted tiny">Данные примерные. Реальные уведомления приходят в Telegram-бота.</p>
+              <div class="signal-stats">
+                <div>
+                  <span class="stat-label">Активных подписок</span>
+                  <span class="stat-value" id="overview-subs">0</span>
+                </div>
+                <div>
+                  <span class="stat-label">Последний сигнал</span>
+                  <span class="stat-value" id="overview-last-signal">–</span>
+                </div>
+                <div>
+                  <span class="stat-label">Текущий порог</span>
+                  <span class="stat-value" id="overview-threshold">–</span>
+                </div>
+              </div>
+              <button id="btn-open-settings" class="secondary-btn tiny full">
+                Команды бота в Telegram
+              </button>
+            </div>
+          </div>
         </div>
       </section>
 
       <!-- СИГНАЛЫ -->
       <section class="tab-panel" id="tab-signals">
         <div class="card">
-          <h2>AI-сигналы (демо)</h2>
+          <h2>AI-сигналы</h2>
           <p class="muted tiny">
-            Здесь — пример сигналов и объяснений. Реальные уведомления приходят в Telegram-бота, а мини-апка помогает
-            понять, что делать с каждым сигналом.
+            Мини-апка показывает разбор сигналов и помогает понять логику. Реальные уведомления отправляет бот.
           </p>
 
-          <div class="signal-filters">
-            <button class="chip chip-active" data-symbol="ALL">Все</button>
-            <button class="chip" data-symbol="BTCUSDT">BTC</button>
-            <button class="chip" data-symbol="ETHUSDT">ETH</button>
-            <button class="chip" data-symbol="SOLUSDT">SOL</button>
+          <!-- Под-вкладки внутри сигналов -->
+          <div class="signals-nav">
+            <button class="signals-tab active" data-sig-tab="feed">Лента</button>
+            <button class="signals-tab" data-sig-tab="my">Мои монеты</button>
+            <button class="signals-tab" data-sig-tab="filters">Фильтры</button>
           </div>
 
-          <div id="signals-cards" class="signals-cards"></div>
+          <!-- Лента сигналов -->
+          <div id="signals-feed" class="signals-feed"></div>
 
-          <button id="btn-new-signal" class="secondary-btn tiny full">🎲 Сгенерировать новый демо-сигнал</button>
-
-          <div class="legend">
-            <h4>Легенда сигналов</h4>
-            <ul class="bullets tiny">
-              <li><b>BUY</b> — сильный сетап, но всё равно считаем риск.</li>
-              <li><b>SELL</b> — фиксация прибыли / защита от слива.</li>
-              <li><b>HOLD</b> — лучше подождать, рынок шумит.</li>
-            </ul>
+          <div class="pagination">
+            <button id="signals-prev" class="pager-btn">Назад</button>
+            <span id="signals-page-label" class="pager-label">—</span>
+            <button id="signals-next" class="pager-btn">Вперёд</button>
           </div>
 
-          <p class="hint">
-            Управление подписками делается в боте: <br />
-            <code>/subscribe BTCUSDT</code>, <code>/unsubscribe BTCUSDT</code>, <code>/my_subs</code>, <code>/set_threshold 0.5</code>
+          <p id="signals-empty" class="muted tiny" style="display:none;">
+            Нет сигналов, подходящих под выбранные монеты/фильтры.
           </p>
+        </div>
+
+        <!-- Детали конкретного сигнала -->
+        <div class="card" id="signals-details">
+          <h3 id="details-title">Детали сигнала</h3>
+          <p id="details-subtitle" class="muted tiny">
+            Нажми на сигнал в ленте, чтобы увидеть детальный разбор: причины роста/падения, контекст и риск.
+          </p>
+          <div id="details-body" class="details-body"></div>
+        </div>
+
+        <!-- Мои монеты -->
+        <div class="card" id="signals-my" style="display:none;">
+          <h3>Выбор монет</h3>
+          <p class="muted tiny">
+            Здесь ты отмечаешь монеты, которые хочешь отслеживать в мини-апке. Для реальных уведомлений
+            всё равно используй команды в боте.
+          </p>
+          <div id="my-coins-list" class="my-coins-list"></div>
+          <p class="muted tiny">
+            Примеры команд в боте: <code>/subscribe BTCUSDT</code>, <code>/unsubscribe BTCUSDT</code>,
+            <code>/my_subs</code>, <code>/set_threshold 0.5</code>.
+          </p>
+        </div>
+
+        <!-- Фильтры -->
+        <div class="card" id="signals-filters" style="display:none;">
+          <h3>Фильтрация ленты</h3>
+          <div class="form-row">
+            <label for="filter-min-change">Минимальное изменение цены, % (по модулю)</label>
+            <input type="number" id="filter-min-change" placeholder="Например, 0.5" />
+          </div>
+          <div class="form-row">
+            <label for="filter-direction">Направление</label>
+            <select id="filter-direction">
+              <option value="all">Любое</option>
+              <option value="buy">Рост (BUY)</option>
+              <option value="sell">Падение (SELL)</option>
+              <option value="hold">Боковик (HOLD)</option>
+            </select>
+          </div>
+          <button id="apply-filters" class="secondary-btn tiny full">Применить фильтры к ленте</button>
         </div>
       </section>
 
@@ -169,59 +161,35 @@
         <div class="card">
           <h2>Академия</h2>
           <p class="muted tiny">
-            Мини-курс для новичков: короткие уроки, реальные риски, логика работы сигналов. Прогресс сохраняется на устройстве.
+            Краткие статьи по базовым темам: что такое крипта, риск-менеджмент, безопасность и работа с сигналами.
           </p>
-
-          <div class="progress">
-            <div id="academy-progress" class="progress-bar"></div>
-          </div>
-          <p class="progress-text">
-            Прогресс: <span id="academy-progress-text">0 / 0 уроков</span>
-          </p>
-
-          <div id="lessons-list" class="lessons"></div>
+          <div id="academy-list" class="academy-list"></div>
         </div>
 
-        <div class="card" id="lesson-view" style="display:none;">
-          <div class="lesson-view-header">
-            <h3 id="lesson-title"></h3>
-            <span id="lesson-status-pill" class="status-pill">Новый</span>
-          </div>
-          <p id="lesson-text"></p>
-          <button id="lesson-toggle-complete" class="secondary-btn tiny">✅ Отметить как пройдено</button>
-        </div>
-
-        <div class="card">
-          <h3>Мини-викторина 🧠</h3>
-          <p class="muted tiny">
-            Проверь, насколько ты понял базу. Это не экзамен, а способ закрепить знания.
-          </p>
-          <p class="muted tiny">Лучший результат: <span id="quiz-best">0/0</span></p>
-          <div id="quiz-block" class="quiz-block">
-            <p id="quiz-question"></p>
-            <div id="quiz-options" class="quiz-options"></div>
-          </div>
-          <p id="quiz-result" class="result tiny"></p>
-          <button id="quiz-next" class="secondary-btn tiny full">Следующий вопрос</button>
+        <div class="card" id="academy-article" style="display:none;">
+          <h3 id="academy-title"></h3>
+          <p id="academy-text"></p>
         </div>
       </section>
 
       <!-- ИНСТРУМЕНТЫ -->
       <section class="tab-panel" id="tab-tools">
-        <!-- КАЛЬКУЛЯТОР ПОЗИЦИИ -->
+        <!-- Калькулятор позиции -->
         <div class="card">
           <h2>Калькулятор позиции</h2>
-          <p class="muted tiny">Определи размер позиции исходя из баланса и риска на сделку.</p>
+          <p class="muted tiny">
+            Определи размер позиции исходя из баланса, риска на сделку и стоп-лосса.
+          </p>
           <div class="form-row">
-            <label>Баланс (USDT)</label>
+            <label for="balance">Баланс (USDT)</label>
             <input type="number" id="balance" placeholder="Например, 1000" />
           </div>
           <div class="form-row">
-            <label>Риск на сделку (%)</label>
+            <label for="risk">Риск на сделку, %</label>
             <input type="number" id="risk" placeholder="Например, 2" />
           </div>
           <div class="form-row">
-            <label>Стоп-лосс (%)</label>
+            <label for="stop">Стоп-лосс, %</label>
             <input type="number" id="stop" placeholder="Например, 5" />
           </div>
           <button id="calc-btn">Рассчитать размер позиции</button>
@@ -231,84 +199,64 @@
         <!-- DCA -->
         <div class="card">
           <h2>DCA-усреднение</h2>
-          <p class="muted tiny">Считаем среднюю цену входа при постепенных покупках.</p>
+          <p class="muted tiny">Посчитай среднюю цену входа при постепенных покупках.</p>
           <div class="form-row">
-            <label>Цена первой покупки</label>
+            <label for="dca-price1">Цена первой покупки</label>
             <input type="number" id="dca-price1" placeholder="Например, 20000" />
           </div>
           <div class="form-row">
-            <label>Цена второй покупки</label>
+            <label for="dca-price2">Цена второй покупки</label>
             <input type="number" id="dca-price2" placeholder="Например, 18000" />
           </div>
           <div class="form-row">
-            <label>Объём каждой покупки (USDT)</label>
+            <label for="dca-amount">Объём каждой покупки (USDT)</label>
             <input type="number" id="dca-amount" placeholder="Например, 100" />
           </div>
           <button id="dca-btn">Посчитать среднюю цену</button>
           <p id="dca-result" class="result tiny"></p>
         </div>
 
-        <!-- PNL -->
+        <!-- PnL -->
         <div class="card">
           <h2>PNL-калькулятор</h2>
-          <p class="muted tiny">Понимай, сколько реально зарабатываешь (или теряешь) в сделке.</p>
+          <p class="muted tiny">Понимай, сколько зарабатываешь или теряешь в сделке.</p>
           <div class="form-row">
-            <label>Цена входа</label>
+            <label for="pnl-entry">Цена входа</label>
             <input type="number" id="pnl-entry" placeholder="Например, 20000" />
           </div>
           <div class="form-row">
-            <label>Цена выхода</label>
+            <label for="pnl-exit">Цена выхода</label>
             <input type="number" id="pnl-exit" placeholder="Например, 21500" />
           </div>
           <div class="form-row">
-            <label>Размер позиции (USDT)</label>
+            <label for="pnl-size">Размер позиции (USDT)</label>
             <input type="number" id="pnl-size" placeholder="Например, 300" />
           </div>
           <button id="pnl-btn">Посчитать PnL</button>
           <p id="pnl-result" class="result tiny"></p>
         </div>
 
-        <!-- ПЛАН СДЕЛКИ -->
+        <!-- План сделки -->
         <div class="card">
           <h2>План сделки</h2>
-          <p class="muted tiny">
-            Заполни вход, цель и стоп — получишь чек-лист и соотношение риск/прибыль.
-          </p>
+          <p class="muted tiny">Пропиши вход, цель и стоп — получишь чек-лист и отношение риск/прибыль.</p>
           <div class="form-row">
-            <label>Цена входа</label>
+            <label for="plan-entry">Цена входа</label>
             <input type="number" id="plan-entry" placeholder="Например, 20000" />
           </div>
           <div class="form-row">
-            <label>Тейк-профит</label>
+            <label for="plan-target">Тейк-профит</label>
             <input type="number" id="plan-target" placeholder="Например, 22000" />
           </div>
           <div class="form-row">
-            <label>Стоп-лосс</label>
+            <label for="plan-stop">Стоп-лосс</label>
             <input type="number" id="plan-stop" placeholder="Например, 19000" />
           </div>
           <button id="plan-btn">Собрать план</button>
           <p id="plan-result" class="result tiny"></p>
         </div>
-
-        <!-- ЧЕК-ЛИСТ БЕЗОПАСНОСТИ -->
-        <div class="card">
-          <h2>Чек-лист безопасности</h2>
-          <ul class="bullets tiny">
-            <li>Не храни крупные суммы на бирже, используй кошельки.</li>
-            <li>Seed-фразу храни оффлайн, никому не отправляй.</li>
-            <li>Всегда проверяй домен сайта и включай 2FA.</li>
-            <li>Игнорируй «гарантированные 10% в день» и схемы «скинь токены, приумножим».</li>
-          </ul>
-        </div>
       </section>
     </main>
-
-    <!-- НИЖНЯЯ ПАНЕЛЬ -->
-    <footer class="bottom-bar">
-      <button class="bottom-btn" data-action="bot-commands">🤖 Команды бота</button>
-      <button class="bottom-btn" data-action="open-academy">📚 Академия</button>
-      <button class="bottom-btn" data-action="open-tools">🧮 Инструменты</button>
-    </footer>
   </div>
 
   <script src="app.js"></script>
