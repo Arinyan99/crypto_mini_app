@@ -19,7 +19,7 @@ if not TOKEN:
 ADMIN_IDS = [1306116066]  # <-- ЗАМЕНИ на свой Telegram ID (можно список)
 
 # Ссылка на твою mini-app (Vercel / Netlify / Render и т.п.)
-MINI_APP_URL = "https://crypto-mini-app-59s3.vercel.app"  # <-- ЗАМЕНИ
+MINI_APP_URL = "https://crypto-mini-app-59s3.vercel.app/"  # <-- ЗАМЕНИ
 
 # Токен Crypto Pay API (из @CryptoBot → Crypto Pay)
 CRYPTO_PAY_TOKEN = os.getenv("CRYPTO_PAY_TOKEN")
