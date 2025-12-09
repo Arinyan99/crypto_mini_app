@@ -1,8 +1,8 @@
-// Telegram init
+
 const tg = window.Telegram ? window.Telegram.WebApp : null;
 
 document.addEventListener("DOMContentLoaded", () => {
-  // Устанавливаем имя пользователя в правый чип
+  
   if (tg) {
     tg.ready();
     const user = tg.initDataUnsafe?.user;
@@ -15,7 +15,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // Навигация между экранами
+  
   const screens = {
     home: document.getElementById("screen-home"),
     overview: document.getElementById("screen-overview"),
@@ -51,10 +51,10 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // Стартовый экран
+ 
   openScreen("home");
 
-  // Профиль трейдера
+  
   const chips = document.querySelectorAll(".chip");
   const currentProfile = document.getElementById("current-profile");
   chips.forEach((chip) => {
@@ -65,7 +65,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // Калькулятор риска
+  
   const depInput = document.getElementById("dep-input");
   const riskInput = document.getElementById("risk-input");
   const riskBtn = document.getElementById("calc-risk");
@@ -86,7 +86,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Академия — текст уроков
+  
   const lessons = document.querySelectorAll(".lesson-row");
   const lessonContent = document.getElementById("lesson-content");
 
@@ -108,7 +108,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // Премиум — кнопки оплаты
+  
   function openPremium() {
     const premiumLink = "https://t.me/crypto_ai_bot?start=subscribe"; // <-- если надо, поменяй на свой deep-link
 
@@ -130,7 +130,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (btn) btn.addEventListener("click", openPremium);
   });
 
-  // Переключение темы (внутри мини-апки, не телеграма)
+  
   const themeToggle = document.getElementById("theme-toggle");
   if (themeToggle) {
     themeToggle.addEventListener("click", () => {
@@ -141,3 +141,4 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 });
+
