@@ -8,46 +8,43 @@ import requests
 import telebot
 from telebot import types
 
-# ========= НАСТРОЙКИ =========
 
-# Токен бота (из GitHub Secrets / переменных окружения)
 TOKEN = os.getenv("BOT_TOKEN")
 if not TOKEN:
     raise ValueError("BOT_TOKEN не найден в переменных окружения")
 
-# ID админов (узнать через @userinfobot / @getmyid_bot)
-ADMIN_IDS = [1306116066]  # <-- ЗАМЕНИ на свой Telegram ID (можно список)
 
-# Ссылка на твою mini-app (Vercel / Netlify / Render и т.п.)
-MINI_APP_URL = "https://crypto-mini-app-59s3.vercel.app/"  # <-- ЗАМЕНИ
+ADMIN_IDS = [1306116066]  
 
-# Токен Crypto Pay API (из @CryptoBot → Crypto Pay)
+
+MINI_APP_URL = "https://crypto-mini-app-59s3.vercel.app/" 
+
+
 CRYPTO_PAY_TOKEN = os.getenv("CRYPTO_PAY_TOKEN")
 if not CRYPTO_PAY_TOKEN:
     raise ValueError("CRYPTO_PAY_TOKEN не найден (добавь в Secrets GitHub)")
 
 CRYPTO_PAY_API_URL = "https://pay.crypt.bot/api"
-CRYPTO_ASSET = "USDT"  # можно "TON", "BTC" и т.д.
+CRYPTO_ASSET = "USDT"  
 
-# Конфиг тарифов: цены и длительность подписки
-# amount — в единицах CRYPTO_ASSET (например, 5 USDT)
+
 PLAN_CONFIG = {
     "lite": {
         "title": "🥉 Подписка LITE (30 дней)",
         "description": "1–2 простых сигнала в день, без перегруза и воды.",
-        "amount": 1.0,   # 5 USDT
+        "amount": 1.0,   
         "days": 30,
     },
     "pro": {
         "title": "🥈 Подписка PRO (30 дней)",
         "description": "3–5 сигналов в день + приоритетные входы и разборы.",
-        "amount": 3.0,   # 9 USDT
+        "amount": 3.0,   
         "days": 30,
     },
     "max": {
         "title": "🥇 Подписка MAX (30 дней)",
         "description": "Все сигналы + персональний разбор раз в неделю.",
-        "amount": 5.0,  # 15 USDT
+        "amount": 5.0, 
         "days": 30,
     },
 }
@@ -57,7 +54,7 @@ DB_PATH = "data.db"
 bot = telebot.TeleBot(TOKEN, parse_mode="HTML")
 
 
-# ========= БАЗА ДАННЫХ =========
+
 
 def db_connect():
     return sqlite3.connect(DB_PATH, check_same_thread=False)
@@ -67,7 +64,7 @@ def db_init():
     conn = db_connect()
     cur = conn.cursor()
 
-    # Пользователи
+    
     cur.execute(
         """
         CREATE TABLE IF NOT EXISTS users (
@@ -85,7 +82,7 @@ def db_init():
         """
     )
 
-    # Логи действий
+    
     cur.execute(
         """
         CREATE TABLE IF NOT EXISTS logs (
@@ -97,7 +94,7 @@ def db_init():
         """
     )
 
-    # Инвойсы от Crypto Bot
+    
     cur.execute(
         """
         CREATE TABLE IF NOT EXISTS invoices (
@@ -207,7 +204,7 @@ def db_log_action(user_id: int, action: str):
     conn.close()
 
 
-# ========= ПОДПИСКИ =========
+
 
 def db_set_subscription(user_id: int, plan: str, days: int):
     """Выдать или продлить подписку."""
@@ -263,22 +260,21 @@ def db_get_subscription(user_id: int):
     return plan, until, active
 
 
-# ========= CRYPTO BOT (Crypto Pay API) =========
+
 
 def crypto_create_invoice(user_id: int, plan_code: str) -> str:
     """
     Создаём invoice через Crypto Bot и возвращаем ссылку на оплату.
     """
     cfg = PLAN_CONFIG[plan_code]
-    amount = cfg["amount"]  # в USDT / TON / BTC
-
+    amount = cfg["amount"]  
     headers = {"Crypto-Pay-API-Token": CRYPTO_PAY_TOKEN}
     payload = {
-        "asset": CRYPTO_ASSET,  # USDT / TON / BTC
+        "asset": CRYPTO_ASSET, 
         "amount": str(amount),
         "description": f"Подписка {plan_code.upper()} для {user_id}",
         "hidden_message": "Спасибо за оплату! Подписка активируется автоматически 🤝",
-        "expires_in": 3600,  # 1 час
+        "expires_in": 3600,  
     }
 
     resp = requests.post(
@@ -295,7 +291,7 @@ def crypto_create_invoice(user_id: int, plan_code: str) -> str:
     invoice_id = invoice["invoice_id"]
     pay_url = invoice["pay_url"]
 
-    # сохраняем инвойс
+    
     conn = db_connect()
     cur = conn.cursor()
     now = datetime.datetime.utcnow().isoformat()
@@ -347,11 +343,11 @@ def crypto_check_invoices():
 
     for inv in items:
         inv_id = inv["invoice_id"]
-        status = inv["status"]  # active, paid, expired, ...
+        status = inv["status"]  
         if status != "paid":
             continue
 
-        # достаём данные из нашей БД
+        
         conn = db_connect()
         cur = conn.cursor()
         cur.execute(
@@ -365,7 +361,7 @@ def crypto_check_invoices():
 
         user_id, plan_code = row
 
-        # помечаем инвойс оплаченным
+       
         cur.execute(
             "UPDATE invoices SET status = 'paid' WHERE invoice_id = ?;",
             (inv_id,),
@@ -381,7 +377,7 @@ def crypto_check_invoices():
         db_set_subscription(user_id, plan_code, days)
         db_log_action(user_id, f"crypto_paid_{plan_code}_{days}")
 
-        # сообщение пользователю
+        
         try:
             bot.send_message(
                 user_id,
@@ -398,7 +394,7 @@ def crypto_check_invoices():
         except Exception:
             pass
 
-        # сообщение админам
+       
         for admin_id in ADMIN_IDS:
             try:
                 bot.send_message(
@@ -410,7 +406,7 @@ def crypto_check_invoices():
                 pass
 
 
-# ========= ВСПОМОГАТЕЛЬНОЕ =========
+
 
 def is_admin(user_id: int) -> bool:
     return user_id in ADMIN_IDS
@@ -461,7 +457,7 @@ def subscribe_keyboard() -> types.InlineKeyboardMarkup:
     return kb
 
 
-# ========= КОМАНДЫ ПОЛЬЗОВАТЕЛЕЙ =========
+
 
 @bot.message_handler(commands=["start", "menu"])
 def cmd_start(message: types.Message):
@@ -605,7 +601,7 @@ def show_subscribe_menu(user_id: int):
     bot.send_message(user_id, text, reply_markup=subscribe_keyboard())
 
 
-# ========= АДМИН-КОМАНДЫ =========
+
 
 @bot.message_handler(commands=["admin"])
 def cmd_admin(message: types.Message):
@@ -745,7 +741,7 @@ def admin_callbacks(call: types.CallbackQuery):
         )
 
 
-# ========= CALLBACK ПОДПИСОК (Crypto Bot) =========
+
 
 @bot.callback_query_handler(func=lambda c: c.data.startswith("sub_"))
 def subscribe_callbacks(call: types.CallbackQuery):
@@ -755,7 +751,7 @@ def subscribe_callbacks(call: types.CallbackQuery):
         bot.answer_callback_query(call.id, "Вы заблокированы.")
         return
 
-    plan_code = call.data.split("_", 1)[1]  # lite / pro / max
+    plan_code = call.data.split("_", 1)[1]  
 
     if plan_code not in PLAN_CONFIG:
         bot.answer_callback_query(call.id, "Неверный тариф.")
@@ -793,7 +789,7 @@ def subscribe_callbacks(call: types.CallbackQuery):
             pass
 
 
-# ========= ОБРАБОТКА ВСЕХ СООБЩЕНИЙ =========
+
 
 @bot.message_handler(func=lambda m: True)
 def handle_all(message: types.Message):
@@ -870,7 +866,7 @@ def handle_all(message: types.Message):
         )
 
 
-# ========= ВОРКЕР ПРОВЕРКИ ОПЛАТ =========
+
 
 def invoices_worker():
     while True:
@@ -878,10 +874,10 @@ def invoices_worker():
             crypto_check_invoices()
         except Exception as e:
             print("Invoice check error:", e)
-        time.sleep(60)  # проверка раз в минуту
+        time.sleep(60)  
 
 
-# ========= ЗАПУСК =========
+
 
 if __name__ == "__main__":
     db_init()
