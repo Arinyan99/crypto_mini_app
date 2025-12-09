@@ -1,17 +1,17 @@
 name: Telegram Bot
 
 on:
-  workflow_dispatch:     # можно запустить руками
+  workflow_dispatch:     
   push:
     branches:
-      - main             # запускается при пуше в main
+      - main             
   schedule:
-    - cron: "0 * * * *"  # автозапуск КАЖДЫЙ ЧАС (UTC)
+    - cron: "0 * * * *"  
 
 jobs:
   run-bot:
     runs-on: ubuntu-latest
-    timeout-minutes: 55   # бот работает ~55 минут, потом джоб завершится
+    timeout-minutes: 55   
 
     steps:
       - name: Checkout repo
